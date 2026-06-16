@@ -5,7 +5,7 @@ A self-hosted, private Dart package repository. Drop-in replacement for [pub.dev
 ## Features
 
 - **Full pub spec v2 compatibility** — works with `dart pub get`, `dart pub publish`, `dart pub add`
-- **Private by default** — all access requires authentication
+- **Private by default** — all access requires authentication, with optional anonymous package installs
 - **Looks like pub.dev** — SvelteKit frontend matching pub.dev's design
 - **Docker-ready** — single container, zero external dependencies
 - **Pluggable storage** — SQLite/PostgreSQL for metadata, filesystem/S3 for packages
@@ -177,6 +177,7 @@ All configuration via environment variables. Key settings:
 |----------|----------|---------|-------------|
 | `SERVER_URL` | Yes | — | Public URL of the server |
 | `JWT_SECRET` | Yes | — | 32+ char secret for JWT signing |
+| `PACKAGE_READ_ACCESS` | No | `private` | Set to `public` to allow anonymous package metadata and archive downloads |
 | `PORT` | No | `8080` | HTTP listen port |
 | `DB_BACKEND` | No | `sqlite` | `sqlite` or `postgres` |
 | `BLOB_BACKEND` | No | `filesystem` | `filesystem` or `s3` |
@@ -196,7 +197,7 @@ Switch backends by changing one environment variable. See [DOCKER.md](docs/DOCKE
 
 ## Security
 
-- All access requires authentication (no anonymous endpoints except health check)
+- All access requires authentication by default (anonymous package installs only when `PACKAGE_READ_ACCESS=public`)
 - Passwords hashed with bcrypt (cost=12)
 - API tokens stored as SHA-256 hashes (raw shown once at creation)
 - Session JWTs signed with HMAC-SHA256

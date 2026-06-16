@@ -20,13 +20,30 @@ class _RejectingAuthService implements AuthService {
   dynamic noSuchMethod(Invocation i) => super.noSuchMethod(i);
 }
 
-Handler _passThrough() => (Request req) async => Response.ok('handled');
+Handler _passThrough() =>
+    (Request req) async => Response.ok('handled');
 
 Future<int> _statusFor(String path, {String method = 'GET'}) async {
   final mw = authMiddleware(
     _RejectingAuthService(),
     publicExactPaths: publicExactPaths,
     publicPathPrefixes: publicPathPrefixes,
+  );
+  final response = await mw(_passThrough())(
+    Request(method, Uri.parse('http://localhost$path')),
+  );
+  return response.statusCode;
+}
+
+Future<int> _statusForPublicPackageRead(
+  String path, {
+  String method = 'GET',
+}) async {
+  final mw = authMiddleware(
+    _RejectingAuthService(),
+    publicExactPaths: publicExactPaths,
+    publicPathPrefixes: publicPathPrefixes,
+    publicRoutePredicate: isPubPackageReadRoute,
   );
   final response = await mw(_passThrough())(
     Request(method, Uri.parse('http://localhost$path')),
@@ -137,8 +154,11 @@ void main() {
           '/api/users/u1/avatar',
         ],
       };
-      expect(samples.keys.toSet(), publicPathPrefixes,
-          reason: 'Add a sample for every prefix in publicPathPrefixes.');
+      expect(
+        samples.keys.toSet(),
+        publicPathPrefixes,
+        reason: 'Add a sample for every prefix in publicPathPrefixes.',
+      );
       for (final entry in samples.entries) {
         for (final path in entry.value) {
           expect(
@@ -178,6 +198,64 @@ void main() {
             reason: '$p must require authentication on a private repo.',
           );
         }
+      },
+    );
+
+    test(
+      'PACKAGE_READ_ACCESS=public exposes only pub install read routes',
+      () async {
+        const publicReads = [
+          '/api/packages/foo',
+          '/api/packages/foo/versions/1.0.0',
+          '/api/packages/foo/versions/1.0.0+build.1',
+          '/api/archives/foo-1.0.0.tar.gz',
+        ];
+        for (final p in publicReads) {
+          expect(
+            await _statusForPublicPackageRead(p),
+            200,
+            reason: '$p should be anonymous-readable in public read mode.',
+          );
+        }
+
+        const stillPrivate = [
+          '/api/packages',
+          '/api/packages/versions/new',
+          '/api/packages/versions/newUploadFinish',
+          '/api/packages/foo/score',
+          '/api/packages/foo/content',
+          '/api/packages/foo/versions/1.0.0/score',
+          '/api/packages/foo/versions/1.0.0/content',
+          '/api/packages/foo/versions/1.0.0/archive.tar.gz',
+          '/api/packages/foo/versions/1.0.0/screenshots/0.png',
+          '/api/packages/foo/versions/1.0.0/readme-assets/diagram.png',
+          '/api/packages/foo/downloads',
+          '/api/admin/packages',
+          '/api/auth/keys',
+          '/documentation/foo/latest/index.html',
+        ];
+        for (final p in stillPrivate) {
+          expect(
+            await _statusForPublicPackageRead(p),
+            401,
+            reason: '$p must remain authenticated in public read mode.',
+          );
+        }
+
+        expect(
+          await _statusForPublicPackageRead(
+            '/api/packages/versions/upload',
+            method: 'POST',
+          ),
+          401,
+        );
+        expect(
+          await _statusForPublicPackageRead(
+            '/api/packages/foo',
+            method: 'POST',
+          ),
+          401,
+        );
       },
     );
 

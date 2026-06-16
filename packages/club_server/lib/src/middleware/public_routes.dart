@@ -66,3 +66,35 @@ const Set<String> publicPathPrefixes = {
   // swallow it by default.
   '/api/users/',
 };
+
+/// True when [path] is one of the pub repository read endpoints required by
+/// `dart pub get`. This is intentionally a route-shaped predicate instead of
+/// a broad `/api/packages` prefix so publish, package settings, scores,
+/// downloads, screenshots, README assets, and future package routes do not
+/// become anonymous by accident.
+bool isPubPackageReadRoute(String path, String method) {
+  if (method.toUpperCase() != 'GET') return false;
+
+  if (path.startsWith('/api/archives/') && path.endsWith('.tar.gz')) {
+    return path.length > '/api/archives/.tar.gz'.length;
+  }
+
+  if (!path.startsWith('/api/packages/')) return false;
+  final tail = path.substring('/api/packages/'.length);
+  final parts = tail.split('/');
+
+  // /api/packages/<package>
+  if (parts.length == 1) {
+    return parts[0].isNotEmpty && parts[0] != 'versions';
+  }
+
+  // /api/packages/<package>/versions/<version>
+  if (parts.length == 3) {
+    return parts[0].isNotEmpty &&
+        parts[0] != 'versions' &&
+        parts[1] == 'versions' &&
+        parts[2].isNotEmpty;
+  }
+
+  return false;
+}

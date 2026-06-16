@@ -482,6 +482,7 @@ See [CONFIGURATION.md](CONFIGURATION.md) for the complete reference.
 |----------|----------|---------|-------------|
 | `SERVER_URL` | Yes | — | Public URL of the server |
 | `JWT_SECRET` | Yes | — | 32+ char secret for JWT signing |
+| `PACKAGE_READ_ACCESS` | No | `private` | Set to `public` to allow anonymous package metadata and archive downloads |
 | `PORT` | No | `8080` | HTTP listen port |
 | `DB_BACKEND` | No | `sqlite` | `sqlite` or `postgres` |
 | `BLOB_BACKEND` | No | `filesystem` | `filesystem` or `s3` |

@@ -6,6 +6,8 @@ import 'package:shelf/shelf.dart';
 import '../auth/cookies.dart';
 import '../scoring/internal_scoring_token.dart';
 
+typedef PublicRoutePredicate = bool Function(String path, String method);
+
 /// Key used to store [AuthenticatedUser] in the request context.
 const String authContextKey = 'club.auth';
 
@@ -46,7 +48,8 @@ enum AuthTransport { none, cookie, bearer }
 /// Defaults to deny: any path under `/api/`, `/oauth/{authorize,approve,
 /// token,pending/...}`, or `/documentation/` requires authentication
 /// unless it appears in [publicExactPaths] (exact match) or
-/// [publicPathPrefixes] (`startsWith` match).
+/// [publicPathPrefixes] (`startsWith` match), or [publicRoutePredicate]
+/// returns true.
 ///
 /// Prefer [publicExactPaths] for everything that can be an exact route.
 /// [publicPathPrefixes] is a footgun: an entry like `/api/packages` would
@@ -59,6 +62,7 @@ Middleware authMiddleware(
   AuthService authService, {
   Set<String> publicExactPaths = const {},
   Set<String> publicPathPrefixes = const {},
+  PublicRoutePredicate? publicRoutePredicate,
   InternalScoringToken? internalScoringToken,
 }) {
   return (Handler innerHandler) {
@@ -85,7 +89,8 @@ Middleware authMiddleware(
       // genuinely need it (e.g. routes with variable path segments).
       final isPublic =
           publicExactPaths.contains(path) ||
-          publicPathPrefixes.any((p) => path.startsWith(p));
+          publicPathPrefixes.any((p) => path.startsWith(p)) ||
+          (publicRoutePredicate?.call(path, request.method) ?? false);
 
       // Try cookie first so that browsers get the session path; fall back
       // to Bearer for CLI / programmatic callers.

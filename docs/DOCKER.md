@@ -183,6 +183,7 @@ docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d
 |----------|---------|-------------|
 | `HOST` | `0.0.0.0` | Bind address |
 | `PORT` | `8080` | Listen port |
+| `PACKAGE_READ_ACCESS` | `private` | `private` or `public`; `public` allows anonymous package metadata and archive downloads |
 | `DB_BACKEND` | `sqlite` | `sqlite` or `postgres` |
 | `SQLITE_PATH` | `/data/db/club.db` | SQLite database file path |
 | `POSTGRES_URL` | — | PostgreSQL connection URL |
@@ -214,6 +215,9 @@ JWT_SECRET=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
 # Bootstrap admin (only used on first startup when no users exist)
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=change-me-immediately
+
+# Optional: allow anonymous dart pub get / archive downloads
+# PACKAGE_READ_ACCESS=public
 
 # Optional: PostgreSQL (uncomment to use)
 # DB_BACKEND=postgres

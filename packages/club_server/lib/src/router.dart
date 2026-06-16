@@ -72,6 +72,10 @@ Handler buildHandler({
   final signupLimiter = rateLimiters.signup;
   final setupLimiter = rateLimiters.setup;
   final inviteLimiter = rateLimiters.invite;
+  final publicRoutePredicate =
+      config.packageReadAccess == PackageReadAccess.public
+      ? isPubPackageReadRoute
+      : null;
   // Create API handlers
   final pubApi = PubApi(
     packageService: packageService,
@@ -318,6 +322,7 @@ Handler buildHandler({
           // auth-required.
           publicExactPaths: publicExactPaths,
           publicPathPrefixes: publicPathPrefixes,
+          publicRoutePredicate: publicRoutePredicate,
           internalScoringToken: internalScoringToken,
         ),
       )

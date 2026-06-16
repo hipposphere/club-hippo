@@ -10,6 +10,8 @@ enum BlobBackend { filesystem, s3, gcs }
 
 enum SearchBackend { sqlite, meilisearch }
 
+enum PackageReadAccess { private, public }
+
 /// Where rendered dartdoc HTML trees are stored and served from.
 enum DartdocBackend {
   /// Write to `dartdocPath` on the local filesystem, serve via
@@ -77,6 +79,7 @@ class AppConfig {
     this.sessionTtlHours = 1,
     this.tokenExpiryDays = 365,
     this.bcryptCost = 12,
+    this.packageReadAccess = PackageReadAccess.private,
     this.dbBackend = DbBackend.sqlite,
     this.sqlitePath = '/data/db/club.db',
     this.postgresUrl,
@@ -112,6 +115,7 @@ class AppConfig {
   final int sessionTtlHours;
   final int tokenExpiryDays;
   final int bcryptCost;
+  final PackageReadAccess packageReadAccess;
 
   // Database
   final DbBackend dbBackend;
@@ -241,6 +245,9 @@ class AppConfig {
         365,
       ),
       bcryptCost: integer(EnvKeys.bcryptCost, 'bcrypt_cost', 12),
+      packageReadAccess: _parsePackageReadAccess(
+        str(EnvKeys.packageReadAccess, 'package_read_access', 'private'),
+      ),
       dbBackend: str(EnvKeys.dbBackend, 'db_backend', 'sqlite') == 'postgres'
           ? DbBackend.postgres
           : DbBackend.sqlite,
@@ -346,6 +353,9 @@ class AppConfig {
       jwtSecret: map['jwt_secret'] as String? ?? '',
       sessionTtlHours: map['session_ttl_hours'] as int? ?? 1,
       tokenExpiryDays: map['token_expiry_days'] as int? ?? 365,
+      packageReadAccess: _parsePackageReadAccess(
+        map['package_read_access'] as String?,
+      ),
       dbBackend: db['backend'] == 'postgres'
           ? DbBackend.postgres
           : DbBackend.sqlite,
@@ -360,8 +370,7 @@ class AppConfig {
       dartdocBackend: _parseDartdocBackend(
         map['dartdoc_backend'] as String?,
       ),
-      dartdocCacheMaxMemoryMb:
-          map['dartdoc_cache_max_memory_mb'] as int? ?? 64,
+      dartdocCacheMaxMemoryMb: map['dartdoc_cache_max_memory_mb'] as int? ?? 64,
     );
   }
 
@@ -412,6 +421,21 @@ class AppConfig {
         return BlobBackend.gcs;
       default:
         return BlobBackend.filesystem;
+    }
+  }
+
+  /// Parse `PACKAGE_READ_ACCESS=private|public`. Unknown / missing values
+  /// fall back to the closed-registry default.
+  static PackageReadAccess _parsePackageReadAccess(String? raw) {
+    switch (raw?.trim().toLowerCase()) {
+      case 'public':
+        return PackageReadAccess.public;
+      case 'private':
+      case '':
+      case null:
+        return PackageReadAccess.private;
+      default:
+        return PackageReadAccess.private;
     }
   }
 

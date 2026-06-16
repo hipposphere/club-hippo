@@ -40,6 +40,12 @@ abstract final class EnvKeys {
   static const tokenExpiryDays = 'TOKEN_EXPIRY_DAYS';
   static const bcryptCost = 'BCRYPT_COST';
 
+  /// Package install/read policy. Default: `private`, meaning package
+  /// metadata and archives require authentication. Set to `public` to allow
+  /// anonymous `dart pub get` / archive downloads while keeping publish,
+  /// admin, account, token, and settings routes authenticated.
+  static const packageReadAccess = 'PACKAGE_READ_ACCESS';
+
   /// When true, exposes the `/signup` page and `POST /api/auth/signup`
   /// endpoint so anyone can self-register. New signups are created with
   /// the `member` role. Default: false (closed / private registry mode).
