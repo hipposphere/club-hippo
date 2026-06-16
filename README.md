@@ -178,6 +178,7 @@ All configuration via environment variables. Key settings:
 | `SERVER_URL` | Yes | — | Public URL of the server |
 | `JWT_SECRET` | Yes | — | 32+ char secret for JWT signing |
 | `PACKAGE_READ_ACCESS` | No | `private` | Set to `public` to allow anonymous package metadata and archive downloads |
+| `ALLOWED_HOSTED_URLS` | No | — | Comma-separated extra registries allowed in dependency `hosted.url` fields |
 | `PORT` | No | `8080` | HTTP listen port |
 | `DB_BACKEND` | No | `sqlite` | `sqlite` or `postgres` |
 | `BLOB_BACKEND` | No | `filesystem` | `filesystem` or `s3` |

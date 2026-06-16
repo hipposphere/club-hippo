@@ -145,8 +145,7 @@ Future<BootstrapResult> bootstrap(
 
   final sdkManager = SdkManager(
     settingsStore: settingsStore,
-    sdkBaseDir:
-        Platform.environment['SDK_BASE_DIR'] ?? '/data/cache/sdks',
+    sdkBaseDir: Platform.environment['SDK_BASE_DIR'] ?? '/data/cache/sdks',
     generateId: () => _uuid.v4(),
   );
   await sdkManager.initialize();
@@ -235,13 +234,13 @@ Future<BootstrapResult> bootstrap(
 
   // Hosted-dep allowlist for the publish validator. Starts from the relaxed
   // club policy (which already includes pub.dev + pub.dartlang.org), then
-  // adds this server's own public URL so packages on this club instance
-  // can depend on each other via `hosted: url: <SERVER_URL>`. Without the
-  // self-URL entry, any inter-club dependency would be rejected at publish
-  // time as "not in the allowed-hosts list".
+  // adds deployment-configured registries plus this server's own public URL.
+  // Without the self-URL entry, any inter-club dependency would be rejected
+  // at publish time as "not in the allowed-hosts list".
   final readerPolicy = pkg_reader.ReaderPolicy.club.copyWith(
     allowedHostedUrls: [
       ...pkg_reader.ReaderPolicy.club.allowedHostedUrls,
+      ...config.allowedHostedUrls,
       if (config.serverUrl != null) config.serverUrl!.toString(),
     ],
   );
@@ -627,8 +626,7 @@ List<ExtractedScreenshot> _resolveScreenshots(
             ? entry['description'] as String
             : null,
         bytes: bytes,
-        mimeType:
-            readmeAssetMimeFor(ext) ?? 'application/octet-stream',
+        mimeType: readmeAssetMimeFor(ext) ?? 'application/octet-stream',
       ),
     );
   }

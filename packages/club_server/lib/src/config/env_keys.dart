@@ -64,6 +64,11 @@ abstract final class EnvKeys {
   /// empty unless you front the server from multiple domains.
   static const allowedOrigins = 'ALLOWED_ORIGINS';
 
+  /// Comma-separated list of extra hosted package registries allowed in
+  /// published packages' dependency `hosted.url` fields. The server's own
+  /// [serverUrl] and pub.dev hosts are always allowed.
+  static const allowedHostedUrls = 'ALLOWED_HOSTED_URLS';
+
   /// When true (default), package version retraction and restoration are
   /// restricted to the 7-day windows defined in the Dart pub spec: a
   /// version can only be retracted within 7 days of its publish date, and

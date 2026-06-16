@@ -99,6 +99,7 @@ class AppConfig {
     this.signupEnabled = false,
     this.trustProxy = false,
     this.allowedOrigins = const [],
+    this.allowedHostedUrls = const [],
     this.enforceRetractionWindow = true,
     this.maxPublishersPerUser = 10,
     this.verificationTokenTtlHours = 24,
@@ -166,6 +167,11 @@ class AppConfig {
   /// signup, setup). [serverUrl] is always included implicitly.
   final List<String> allowedOrigins;
 
+  /// Extra registries accepted in dependency `hosted.url` fields when
+  /// publishing packages. pub.dev hosts and [serverUrl] are included
+  /// implicitly by the package reader policy bootstrap.
+  final List<String> allowedHostedUrls;
+
   /// Enforce the pub spec's 7-day retraction/restoration windows. When
   /// `true` (the default), a version can only be retracted within 7 days
   /// of publishing and only restored within 7 days of retraction — the
@@ -230,6 +236,21 @@ class AppConfig {
       return v == 'true' || v == '1' || v == 'yes' || v == 'on';
     }
 
+    List<String> stringList(String envKey, [String? yamlKey]) {
+      final rawEnv = readEnv(envKey);
+      if (rawEnv != null) return _parseStringList(rawEnv);
+
+      final rawYaml = yaml[yamlKey ?? envKey];
+      if (rawYaml is Iterable) {
+        return rawYaml
+            .map((value) => value.toString().trim())
+            .where((value) => value.isNotEmpty)
+            .toList();
+      }
+      if (rawYaml != null) return _parseStringList(rawYaml.toString());
+      return const <String>[];
+    }
+
     final serverUrlStr = str(EnvKeys.serverUrl, 'server_url');
 
     return AppConfig(
@@ -290,15 +311,11 @@ class AppConfig {
       ),
       signupEnabled: boolean(EnvKeys.signupEnabled, 'signup_enabled', false),
       trustProxy: boolean(EnvKeys.trustProxy, 'trust_proxy', false),
-      allowedOrigins: () {
-        final raw = str(EnvKeys.allowedOrigins, 'allowed_origins', '');
-        if (raw.isEmpty) return const <String>[];
-        return raw
-            .split(',')
-            .map((s) => s.trim())
-            .where((s) => s.isNotEmpty)
-            .toList();
-      }(),
+      allowedOrigins: stringList(EnvKeys.allowedOrigins, 'allowed_origins'),
+      allowedHostedUrls: stringList(
+        EnvKeys.allowedHostedUrls,
+        'allowed_hosted_urls',
+      ),
       enforceRetractionWindow: boolean(
         EnvKeys.enforceRetractionWindow,
         'enforce_retraction_window',
@@ -371,6 +388,7 @@ class AppConfig {
         map['dartdoc_backend'] as String?,
       ),
       dartdocCacheMaxMemoryMb: map['dartdoc_cache_max_memory_mb'] as int? ?? 64,
+      allowedHostedUrls: _parseStringList(map['allowed_hosted_urls']),
     );
   }
 
@@ -453,6 +471,22 @@ class AppConfig {
       default:
         return DartdocBackend.filesystem;
     }
+  }
+
+  static List<String> _parseStringList(Object? raw) {
+    if (raw is Iterable) {
+      return raw
+          .map((value) => value.toString().trim())
+          .where((value) => value.isNotEmpty)
+          .toList();
+    }
+    final value = raw?.toString();
+    if (value == null || value.isEmpty) return const <String>[];
+    return value
+        .split(',')
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .toList();
   }
 
   static GcsConfig? _parseGcs(
