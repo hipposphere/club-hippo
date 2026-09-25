@@ -238,6 +238,7 @@ Future<BootstrapResult> bootstrap(
   // Without the self-URL entry, any inter-club dependency would be rejected
   // at publish time as "not in the allowed-hosts list".
   final readerPolicy = pkg_reader.ReaderPolicy.club.copyWith(
+    allowPinnedGitDependencies: config.allowPinnedGitDependencies,
     allowedHostedUrls: [
       ...pkg_reader.ReaderPolicy.club.allowedHostedUrls,
       ...config.allowedHostedUrls,

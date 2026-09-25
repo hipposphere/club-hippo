@@ -3,6 +3,7 @@
 ### Fixed
 
 - Release-notes dialog: looser line-height, more space between bullets, larger section headings.
+- Self-hosted registries can opt into publishing packages with HTTPS Git dependencies pinned to full commit SHAs using `ALLOW_PINNED_GIT_DEPENDENCIES=true`.
 
 ## 0.4.0
 

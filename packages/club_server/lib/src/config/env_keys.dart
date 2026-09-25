@@ -69,6 +69,10 @@ abstract final class EnvKeys {
   /// [serverUrl] and pub.dev hosts are always allowed.
   static const allowedHostedUrls = 'ALLOWED_HOSTED_URLS';
 
+  /// Allow HTTPS Git dependencies pinned to a full commit SHA in uploaded
+  /// packages. Other Git dependencies remain forbidden. Default: false.
+  static const allowPinnedGitDependencies = 'ALLOW_PINNED_GIT_DEPENDENCIES';
+
   /// When true (default), package version retraction and restoration are
   /// restricted to the 7-day windows defined in the Dart pub spec: a
   /// version can only be retracted within 7 days of its publish date, and

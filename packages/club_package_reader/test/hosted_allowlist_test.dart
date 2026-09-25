@@ -66,16 +66,14 @@ $body
         forbidGitDependencies(
           pubspec,
           allowGit: !policy.forbidGitDependencies,
+          allowPinnedGit: policy.allowPinnedGitDependencies,
           forbidNonDefaultHosted: policy.forbidNonDefaultHostedDependencies,
           allowedHostedUrls: policy.allowedHostedUrls,
           isHostedUrlAllowed: policy.isHostedUrlAllowed,
         ).map((e) => e.message);
 
     test('bare `foo: ^1.0.0` is accepted (default pub)', () {
-      expect(
-        issues(p('  http: ^1.0.0\n'), ReaderPolicy.club),
-        isEmpty,
-      );
+      expect(issues(p('  http: ^1.0.0\n'), ReaderPolicy.club), isEmpty);
     });
 
     test('explicit `hosted: https://pub.dev` is accepted', () {

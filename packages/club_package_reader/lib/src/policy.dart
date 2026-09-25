@@ -32,6 +32,10 @@ class ReaderPolicy {
   /// any registry — git refs are not reproducible and break offline installs.
   final bool forbidGitDependencies;
 
+  /// Accept HTTPS Git dependencies pinned to a full commit SHA even when
+  /// other Git dependencies are forbidden. Off unless a registry opts in.
+  final bool allowPinnedGitDependencies;
+
   /// Reject hosted dependencies whose URL is not in [allowedHostedUrls].
   ///
   /// Recommended true — a package on registry A should not transitively
@@ -77,6 +81,7 @@ class ReaderPolicy {
     this.requireReadme = true,
     this.checkPublishTo = true,
     this.forbidGitDependencies = true,
+    this.allowPinnedGitDependencies = false,
     this.forbidNonDefaultHostedDependencies = true,
     this.allowedHostedUrls = _defaultPubDevHosts,
     this.rejectEmojiInDescription = true,
@@ -87,9 +92,7 @@ class ReaderPolicy {
   });
 
   /// Strict defaults matching pub.dev's behaviour.
-  static const pubDev = ReaderPolicy(
-    checkMixedCasePackageNames: true,
-  );
+  static const pubDev = ReaderPolicy(checkMixedCasePackageNames: true);
 
   /// Relaxed defaults for self-hosted private registries. Accepts dependencies
   /// hosted on pub.dev by default; append the server's own URL via
@@ -120,6 +123,7 @@ class ReaderPolicy {
     bool? requireReadme,
     bool? checkPublishTo,
     bool? forbidGitDependencies,
+    bool? allowPinnedGitDependencies,
     bool? forbidNonDefaultHostedDependencies,
     List<String>? allowedHostedUrls,
     bool? rejectEmojiInDescription,
@@ -132,6 +136,8 @@ class ReaderPolicy {
     requireReadme: requireReadme ?? this.requireReadme,
     checkPublishTo: checkPublishTo ?? this.checkPublishTo,
     forbidGitDependencies: forbidGitDependencies ?? this.forbidGitDependencies,
+    allowPinnedGitDependencies:
+        allowPinnedGitDependencies ?? this.allowPinnedGitDependencies,
     forbidNonDefaultHostedDependencies:
         forbidNonDefaultHostedDependencies ??
         this.forbidNonDefaultHostedDependencies,
