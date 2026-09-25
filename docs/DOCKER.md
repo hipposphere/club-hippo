@@ -185,6 +185,7 @@ docker compose -f docker-compose.yml -f docker-compose.postgres.yml up -d
 | `PORT` | `8080` | Listen port |
 | `PACKAGE_READ_ACCESS` | `private` | `private` or `public`; `public` allows anonymous package metadata and archive downloads |
 | `ALLOWED_HOSTED_URLS` | — | Comma-separated extra registries allowed in dependency `hosted.url` fields |
+| `ALLOW_PINNED_GIT_DEPENDENCIES` | `false` | Accept HTTPS Git dependencies pinned to full commit SHAs in published packages |
 | `DB_BACKEND` | `sqlite` | `sqlite` or `postgres` |
 | `SQLITE_PATH` | `/data/db/club.db` | SQLite database file path |
 | `POSTGRES_URL` | — | PostgreSQL connection URL |

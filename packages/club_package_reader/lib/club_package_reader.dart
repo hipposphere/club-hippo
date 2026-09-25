@@ -309,6 +309,7 @@ Future<PackageSummary> summarizePackageArchive(
       forbidGitDependencies(
         pubspec,
         allowGit: !policy.forbidGitDependencies,
+        allowPinnedGit: policy.allowPinnedGitDependencies,
         forbidNonDefaultHosted: policy.forbidNonDefaultHostedDependencies,
         allowedHostedUrls: policy.allowedHostedUrls,
         isHostedUrlAllowed: policy.isHostedUrlAllowed,
@@ -625,6 +626,7 @@ Iterable<ArchiveIssue> validateDependencies(Pubspec pubspec) sync* {
 /// It ignores `dev_dependencies` as these are for development only.
 ///
 /// - [allowGit] skips the git-dependency rejection.
+/// - [allowPinnedGit] accepts HTTPS Git dependencies with a full commit SHA.
 /// - [forbidNonDefaultHosted] gates the hosted-URL check entirely; when
 ///   false, `hosted:` deps targeting any registry are accepted.
 /// - [allowedHostedUrls] lists the origins accepted by an explicit
@@ -633,6 +635,7 @@ Iterable<ArchiveIssue> validateDependencies(Pubspec pubspec) sync* {
 Iterable<ArchiveIssue> forbidGitDependencies(
   Pubspec pubspec, {
   bool allowGit = false,
+  bool allowPinnedGit = false,
   bool forbidNonDefaultHosted = true,
   List<String> allowedHostedUrls = const ['https://pub.dev'],
   bool Function(String url)? isHostedUrlAllowed,
@@ -642,6 +645,12 @@ Iterable<ArchiveIssue> forbidGitDependencies(
 
     if (entry.value is GitDependency) {
       if (allowGit) continue;
+      final git = entry.value as GitDependency;
+      if (allowPinnedGit &&
+          git.url.scheme == 'https' &&
+          RegExp(r'^[0-9a-fA-F]{40}$').hasMatch(git.ref ?? '')) {
+        continue;
+      }
       yield ArchiveIssue(
         'Package dependency $name is a git dependency, '
         'this is not allowed in published packages.',

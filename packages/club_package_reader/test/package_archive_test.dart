@@ -385,6 +385,47 @@ dev_dependencies:
       expect(forbidGitDependencies(pubspec).toList(), isNotEmpty);
     });
 
+    test('opted-in HTTPS Git dependency with a full commit SHA is allowed', () {
+      final pubspec = Pubspec.parse('''
+      name: hack
+      version: 1.0.1
+      dependencies:
+        kittens:
+          git:
+            url: https://github.com/munificent/kittens.git
+            ref: 47f4e3146bec18651d6a950ca041f95c0ed7d70d
+            path: pkgs/kittens
+      ''');
+      expect(
+        forbidGitDependencies(pubspec, allowPinnedGit: true).toList(),
+        isEmpty,
+      );
+    });
+
+    test('opt-in still rejects branch refs and insecure Git URLs', () {
+      for (final url in [
+        'https://github.com/munificent/kittens.git',
+        'git://github.com/munificent/kittens.git',
+      ]) {
+        final ref = url.startsWith('https:')
+            ? 'main'
+            : '47f4e3146bec18651d6a950ca041f95c0ed7d70d';
+        final pubspec = Pubspec.parse('''
+        name: hack
+        version: 1.0.1
+        dependencies:
+          kittens:
+            git:
+              url: $url
+              ref: $ref
+        ''');
+        expect(
+          forbidGitDependencies(pubspec, allowPinnedGit: true).toList(),
+          isNotEmpty,
+        );
+      }
+    });
+
     test('custom hosted dependencies are forbidden', () {
       final pubspec = Pubspec.parse('''
       name: hack
@@ -854,9 +895,9 @@ dev_dependencies:
       topics:
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('only a list')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('only a list')),
         isTrue,
       );
     });
@@ -873,9 +914,9 @@ dev_dependencies:
         - client
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('at most 5')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('at most 5')),
         isTrue,
       );
     });
@@ -888,9 +929,9 @@ dev_dependencies:
         - b: widget
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('only strings')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('only strings')),
         isTrue,
       );
     });
@@ -904,9 +945,9 @@ dev_dependencies:
         - b
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('too short')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('too short')),
         isTrue,
       );
     });
@@ -920,9 +961,9 @@ dev_dependencies:
         - thisisindeedaverylongnamefortopic
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('too long')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('too long')),
         isTrue,
       );
     });
@@ -936,9 +977,9 @@ dev_dependencies:
         - button
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('present once')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('present once')),
         isTrue,
       );
     });
@@ -950,9 +991,9 @@ dev_dependencies:
         - -button
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('must consist')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('must consist')),
         isTrue,
       );
     });
@@ -964,9 +1005,9 @@ dev_dependencies:
         - 1button
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('must consist')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('must consist')),
         isTrue,
       );
     });
@@ -978,9 +1019,9 @@ dev_dependencies:
         - button-
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('must consist')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('must consist')),
         isTrue,
       );
     });
@@ -992,9 +1033,9 @@ dev_dependencies:
         - but--ton
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('must consist')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('must consist')),
         isTrue,
       );
     });
@@ -1006,9 +1047,9 @@ dev_dependencies:
         - copyWith
       ''';
       expect(
-        checkTopics(
-          pubspec,
-        ).map((e) => e.message).every((e) => e.contains('must consist')),
+        checkTopics(pubspec)
+            .map((e) => e.message)
+            .every((e) => e.contains('must consist')),
         isTrue,
       );
     });

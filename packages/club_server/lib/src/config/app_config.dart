@@ -100,6 +100,7 @@ class AppConfig {
     this.trustProxy = false,
     this.allowedOrigins = const [],
     this.allowedHostedUrls = const [],
+    this.allowPinnedGitDependencies = false,
     this.enforceRetractionWindow = true,
     this.maxPublishersPerUser = 10,
     this.verificationTokenTtlHours = 24,
@@ -171,6 +172,9 @@ class AppConfig {
   /// publishing packages. pub.dev hosts and [serverUrl] are included
   /// implicitly by the package reader policy bootstrap.
   final List<String> allowedHostedUrls;
+
+  /// Accept HTTPS Git dependencies pinned to a full commit SHA on publish.
+  final bool allowPinnedGitDependencies;
 
   /// Enforce the pub spec's 7-day retraction/restoration windows. When
   /// `true` (the default), a version can only be retracted within 7 days
@@ -316,6 +320,11 @@ class AppConfig {
         EnvKeys.allowedHostedUrls,
         'allowed_hosted_urls',
       ),
+      allowPinnedGitDependencies: boolean(
+        EnvKeys.allowPinnedGitDependencies,
+        'allow_pinned_git_dependencies',
+        false,
+      ),
       enforceRetractionWindow: boolean(
         EnvKeys.enforceRetractionWindow,
         'enforce_retraction_window',
@@ -384,11 +393,11 @@ class AppConfig {
       maxUploadBytes: map['max_upload_bytes'] as int? ?? 100 * 1024 * 1024,
       staticFilesPath: map['static_files_path'] as String?,
       dartdocPath: map['dartdoc_path'] as String? ?? '/data/cache/dartdoc',
-      dartdocBackend: _parseDartdocBackend(
-        map['dartdoc_backend'] as String?,
-      ),
+      dartdocBackend: _parseDartdocBackend(map['dartdoc_backend'] as String?),
       dartdocCacheMaxMemoryMb: map['dartdoc_cache_max_memory_mb'] as int? ?? 64,
       allowedHostedUrls: _parseStringList(map['allowed_hosted_urls']),
+      allowPinnedGitDependencies:
+          map['allow_pinned_git_dependencies'] as bool? ?? false,
     );
   }
 
